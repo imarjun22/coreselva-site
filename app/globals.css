@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  background: #000;
+  color: white;
+}
+.bg-core {
+  background:
+    radial-gradient(
+      600px circle at top,
+      rgba(250, 204, 21, 0.12),
+      transparent 60%
+    ),
+    linear-gradient(#050505, #000000);
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+h1 {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+html {
+  scroll-behavior: smooth;
+}
