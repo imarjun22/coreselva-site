@@ -20,7 +20,7 @@ export default function Footer() {
             <div className="mt-6 flex items-center gap-3 text-sm">
               {/* Small avatar */}
               <img
-                src="/src/karan.jpg"
+                src="/karan.jpg"
                 alt="Karan Arjun"
                 className="w-9 h-9 rounded-full object-cover border border-yellow/30"
                 />
