@@ -16,16 +16,14 @@ export default function Footer() {
               architecture, RISC-V, and FPGA-first system design.
             </p>
 
-            {/* Maintainer (WITH SMALL PHOTO) */}
+            {/* Maintainer */}
             <div className="mt-6 flex items-center gap-3 text-sm">
-              {/* Small avatar */}
               <img
                 src="/karan.jpg"
                 alt="Karan Arjun"
                 className="w-9 h-9 rounded-full object-cover border border-yellow/30"
-                />
+              />
 
-              {/* Text */}
               <div className="leading-tight">
                 <p className="font-semibold text-white">Maintained by</p>
                 <p className="text-white/70">Karan Arjun S</p>
@@ -44,6 +42,7 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-white mb-4">
               Quick Links
             </h4>
+
             <ul className="space-y-2 text-sm">
               <li>
                 <a href="#home" className="text-white/60 hover:text-yellow">
@@ -73,6 +72,7 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-white mb-4">
               Resources
             </h4>
+
             <ul className="space-y-2 text-sm text-white/60">
               <li>Documentation</li>
               <li>Getting Started</li>
@@ -86,6 +86,7 @@ export default function Footer() {
             <h4 className="text-sm font-semibold text-white mb-4">
               Philosophy
             </h4>
+
             <p className="text-sm text-white/60 leading-relaxed">
               Built for clarity, correctness, education, and not black-box
               performance. Every design is meant to be read, understood,
@@ -97,8 +98,21 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-sm text-white/50">
-          <span>© 2026 CoreSelva. Open-source educational project.</span>
-          <span className="mt-2 md:mt-0">contact for support</span>
+          <span>
+            © 2026 CoreSelva — Open-source educational project licensed under{" "}
+            <a
+              href="https://www.apache.org/licenses/LICENSE-2.0"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-yellow hover:underline"
+            >
+              Apache 2.0
+            </a>
+          </span>
+
+          <span className="mt-2 md:mt-0">
+            Educational use • Community driven
+          </span>
         </div>
 
       </div>
