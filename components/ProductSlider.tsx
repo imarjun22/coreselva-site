@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, Check, Github } from "lucide-react";
-import { useState } from "react";
+
+/* ---------------- DATA ---------------- */
 
 const PRODUCTS = [
   {
@@ -15,17 +17,17 @@ const PRODUCTS = [
         role: "Base Educational Core",
         badge: "Implemented / Stable",
         badgeClass: "bg-green-600/20 text-green-400 border-green-500/30",
-        github: "https://github.com/KaranArjunS/CSRV64I_SC",
         features: [
-            "RV64I ISA",
-            "In-order execution",
-            "Non-pipelined (Single-cycle)",
-            "Machine mode only",
-            "No MMU, No caches",
+          "RV64I ISA",
+          "In-order execution",
+          "Non-pipelined (Single-cycle)",
+          "Machine mode only",
+          "No MMU, No caches",
         ],
         purpose:
-            "Teaching RISC-V fundamentals, verification baseline, architecture research starting point",
-        },
+          "Teaching RISC-V fundamentals, verification baseline, architecture research starting point",
+        github: "https://github.com/KaranArjunS/CSRV64I_SC",
+      },
       {
         title: "CSRV64-IM-P5",
         role: "Embedded / MCU Profile",
@@ -58,7 +60,6 @@ const PRODUCTS = [
       },
     ],
   },
-
   {
     tag: "MCU PRODUCT LINE",
     title: "CSRV32",
@@ -86,13 +87,12 @@ const PRODUCTS = [
           "RV32IM ISA",
           "Basic pipeline",
           "Interrupt support",
-          "Google Skywater",
+          "ASIC-ready",
         ],
         purpose: "Embedded CPU pipeline learning",
       },
     ],
   },
-
   {
     tag: "EXPERIMENTAL LINE",
     title: "CSRB16",
@@ -112,7 +112,6 @@ const PRODUCTS = [
       },
     ],
   },
-
   {
     tag: "PERIPHERALS",
     title: "SoC Components",
@@ -134,52 +133,102 @@ const PRODUCTS = [
   },
 ];
 
+/* ---------------- COMPONENT ---------------- */
+
+const SWIPE_THRESHOLD = 60; // px
+
 export default function ProductSlider() {
   const [index, setIndex] = useState(0);
+
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
   const current = PRODUCTS[index];
 
   const prev = () =>
     setIndex((i) => (i === 0 ? PRODUCTS.length - 1 : i - 1));
+
   const next = () =>
     setIndex((i) => (i === PRODUCTS.length - 1 ? 0 : i + 1));
 
+  /* -------- Touch handlers (mobile swipe) -------- */
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+
+    const diff = touchStartX.current - touchEndX.current;
+
+    if (diff > SWIPE_THRESHOLD) next();
+    else if (diff < -SWIPE_THRESHOLD) prev();
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   return (
-    <section className="relative bg-black py-28">
-      {/* Arrows */}
-      <button
-        onClick={prev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full border border-yellow/30 p-2 text-yellow/70 hover:text-yellow hover:border-yellow transition"
-      >
-        <ChevronLeft />
-      </button>
+    <section
+      id="products"
+      className="relative bg-black py-28"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      <div className="relative mx-auto max-w-6xl px-6">
 
-      <button
-        onClick={next}
-        className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full border border-yellow/30 p-2 text-yellow/70 hover:text-yellow hover:border-yellow transition"
-      >
-        <ChevronRight />
-      </button>
+        {/* Desktop arrows */}
+        <button
+          onClick={prev}
+          className="absolute -left-12 top-1/2 -translate-y-1/2 hidden md:flex
+                     rounded-full border border-yellow/30 p-2
+                     text-yellow/70 hover:text-yellow hover:border-yellow transition"
+        >
+          <ChevronLeft />
+        </button>
 
-      {/* Header */}
-      <div className="mx-auto max-w-6xl px-6 text-center">
-        <span className="inline-block rounded-full bg-yellow px-4 py-1 text-xs font-semibold text-black">
-          {current.tag}
-        </span>
+        <button
+          onClick={next}
+          className="absolute -right-12 top-1/2 -translate-y-1/2 hidden md:flex
+                     rounded-full border border-yellow/30 p-2
+                     text-yellow/70 hover:text-yellow hover:border-yellow transition"
+        >
+          <ChevronRight />
+        </button>
 
-        <h2 className="mt-5 text-4xl font-bold text-white">
-          {current.title}
-        </h2>
+        {/* Header */}
+        <div className="text-center">
+          <span className="inline-block rounded-full bg-yellow px-4 py-1 text-xs font-semibold text-black">
+            {current.tag}
+          </span>
 
-        <p className="mt-3 text-sm text-muted">
-          {current.subtitle}
-        </p>
+          <h2 className="mt-5 text-4xl font-bold text-white">
+            {current.title}
+          </h2>
+
+          <p className="mt-3 text-sm text-muted">
+            {current.subtitle}
+          </p>
+
+          <p className="mt-3 text-xs text-white/40 md:hidden">
+            Swipe left or right to explore →
+          </p>
+        </div>
 
         {/* Cards */}
         <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-3">
           {current.cards.map((card) => (
             <div
-            key={card.title}
-            className="flex h-full flex-col rounded-2xl border border-yellow/20 bg-gradient-to-b from-[#0b1220] to-black p-6"
+              key={card.title}
+              className="flex h-full flex-col rounded-2xl
+                         border border-yellow/20
+                         bg-gradient-to-b from-[#0b1220] to-black p-6"
             >
               <h3 className="text-lg font-semibold text-yellow">
                 {card.title}
@@ -214,32 +263,28 @@ export default function ProductSlider() {
                 <p className="text-sm text-muted">{card.purpose}</p>
               </div>
 
-             {card.github ? (
+              {card.github ? (
                 <a
-                    href={card.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
-                    mt-6 flex w-full items-center justify-center gap-2
-                    rounded-md bg-yellow py-3 text-sm font-semibold text-black
-                    hover:brightness-110 transition
-                    "
+                  href={card.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 flex w-full items-center justify-center gap-2
+                             rounded-md bg-yellow py-3 text-sm font-semibold text-black
+                             hover:brightness-110 transition"
                 >
-                    <Github size={16} />
-                    View on GitHub
+                  <Github size={16} />
+                  View on GitHub
                 </a>
-                ) : (
+              ) : (
                 <div
-                    className="
-                    mt-6 flex w-full items-center justify-center gap-2
-                    rounded-md bg-white/10 py-3 text-sm font-semibold text-white/50
-                    cursor-not-allowed
-                    "
+                  className="mt-6 flex w-full items-center justify-center gap-2
+                             rounded-md bg-white/10 py-3 text-sm font-semibold text-white/50
+                             cursor-not-allowed"
                 >
-                    <Github size={16} />
-                    Coming Soon
+                  <Github size={16} />
+                  Coming Soon
                 </div>
-                )}
+              )}
             </div>
           ))}
         </div>
