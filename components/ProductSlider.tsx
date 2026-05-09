@@ -29,10 +29,10 @@ const PRODUCTS = [
         github: "https://github.com/KaranArjunS/CSRV64I_SC",
       },
       {
-        title: "CSRV64-IM-P5",
+        title: "CSRV64-I-P5",
         role: "Embedded / MCU Profile",
-        badge: "Planned / In Progress",
-        badgeClass: "bg-blue-600/20 text-blue-400 border-blue-500/30",
+        badge: "Implemented / Stable",
+        badgeClass: "bg-green-600/20 text-green-400 border-green-500/30",
         features: [
           "RV64IM ISA",
           "5-stage in-order pipeline",
@@ -42,6 +42,7 @@ const PRODUCTS = [
         ],
         purpose:
           "Teaching pipelined CPU design, embedded workloads, FPGA SoC integration",
+        github: "https://github.com/KaranArjunS/CoreSelva-RV64I-5-Stage-ArtyA7",
       },
       {
         title: "CSRV64-GS-LX",
