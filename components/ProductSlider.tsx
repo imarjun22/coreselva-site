@@ -29,7 +29,7 @@ const PRODUCTS = [
         github: "https://github.com/KaranArjunS/CSRV64I_SC",
       },
       {
-        title: "CSRV64-I-P5",
+        title: "CSRV64I-P5",
         role: "Embedded / MCU Profile",
         badge: "Implemented / Stable",
         badgeClass: "bg-green-600/20 text-green-400 border-green-500/30",
