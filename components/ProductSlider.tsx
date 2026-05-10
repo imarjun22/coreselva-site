@@ -34,11 +34,11 @@ const PRODUCTS = [
         badge: "Implemented / Stable",
         badgeClass: "bg-green-600/20 text-green-400 border-green-500/30",
         features: [
-          "RV64IM ISA",
+          "RV64I base ISA",
           "5-stage in-order pipeline",
           "Hazard detection and forwarding",
-          "Optional cache",
-          "Interrupt & timer support",
+          "Branch/jump flush + load-use stall handling",
+          "Tested on Artix-7 FPGA",
         ],
         purpose:
           "Teaching pipelined CPU design, embedded workloads, FPGA SoC integration",
