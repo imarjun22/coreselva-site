@@ -16,24 +16,73 @@ export default function Footer() {
               architecture, RISC-V, and FPGA-first system design.
             </p>
 
-            {/* Maintainer */}
-            <div className="mt-6 flex items-center gap-3 text-sm">
-              <img
-                src="/karan.jpg"
-                alt="Karan Arjun"
-                className="w-9 h-9 rounded-full object-cover border border-yellow/30"
-              />
+            {/* Maintainers */}
+            <div className="mt-6 space-y-5 text-sm">
 
-              <div className="leading-tight">
-                <p className="font-semibold text-white">Maintained by</p>
-                <p className="text-white/70">Karan Arjun S</p>
-                <a
-                  href="mailto:karanarjun432@gmail.com"
-                  className="text-yellow hover:underline"
-                >
-                  karanarjun432@gmail.com
-                </a>
+              {/* Karan */}
+              <div className="flex items-center gap-3">
+                <img
+                  src="/karan.jpg"
+                  alt="Karan Arjun"
+                  className="w-9 h-9 rounded-full object-cover border border-yellow/30"
+                />
+
+                <div className="leading-tight">
+                  <p className="font-semibold text-white">
+                    Maintained by
+                  </p>
+
+                  <p className="text-white/70">
+                    Karan Arjun S
+                  </p>
+
+                  <p className="text-white/50 text-xs">
+                    Mechatronics & Automation Engineering
+                  </p>
+
+                  <a
+                    href="mailto:karanarjun432@gmail.com"
+                    className="text-yellow hover:underline"
+                  >
+                    karanarjun432@gmail.com
+                  </a>
+                </div>
               </div>
+
+              {/* Vishal */}
+              <div className="flex items-center gap-3">
+                <img
+                  src="/vishal.jpg"
+                  alt="Vishal"
+                  className="w-9 h-9 rounded-full object-cover border border-yellow/30"
+                />
+
+                <div className="leading-tight">
+                  <p className="font-semibold text-white">
+                    Co-Developer
+                  </p>
+
+                  <p className="text-white/70">
+                    Vishal
+                  </p>
+
+                  <p className="text-white/50 text-xs">
+                    Electronics & Communication Engineering
+                  </p>
+
+                  <p className="text-white/50 text-xs">
+                    SASTRA University
+                  </p>
+
+                  <a
+                    href="mailto:vishalselvan0017@gmail.com"
+                    className="text-yellow hover:underline"
+                  >
+                    vishalselvan0017@gmail.com
+                  </a>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -49,18 +98,24 @@ export default function Footer() {
                   Home
                 </a>
               </li>
+
               <li>
                 <a href="#csrv64" className="text-white/60 hover:text-yellow">
                   CSRV64
                 </a>
               </li>
+
               <li>
                 <a href="#products" className="text-white/60 hover:text-yellow">
                   Products
                 </a>
               </li>
+
               <li>
-                <a href="#who-we-serve" className="text-white/60 hover:text-yellow">
+                <a
+                  href="#who-we-serve"
+                  className="text-white/60 hover:text-yellow"
+                >
                   Who We Serve
                 </a>
               </li>
@@ -98,8 +153,10 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-sm text-white/50">
+
           <span>
             © 2026 CoreSelva — Open-source educational project licensed under{" "}
+
             <a
               href="https://www.apache.org/licenses/LICENSE-2.0"
               target="_blank"
@@ -113,6 +170,7 @@ export default function Footer() {
           <span className="mt-2 md:mt-0">
             Educational use • Community driven
           </span>
+
         </div>
 
       </div>
