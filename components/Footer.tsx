@@ -63,7 +63,7 @@ export default function Footer() {
                   </p>
 
                   <p className="text-white/70">
-                    Vishal
+                    Vishal S
                   </p>
 
                   <p className="text-white/50 text-xs">
