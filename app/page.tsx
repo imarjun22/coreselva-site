@@ -40,14 +40,25 @@ export default function Home() {
             and FPGA experimentation
           </p>
 
-          {/* CTA */}
-          <div className="mt-12 flex justify-center">
+          {/* CTA Buttons */}
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+
+            {/* Compiler Button */}
+            <a
+              href="/compiler"
+              className="inline-flex items-center justify-center bg-yellow text-black font-bold text-lg px-10 py-4 rounded-lg shadow-[0_0_35px_rgba(250,204,21,0.6)] hover:brightness-110 transition"
+            >
+              Open RISC-V Compiler
+            </a>
+
+            {/* Products Button */}
             <a
               href="#csrv64"
-              className="inline-flex items-center justify-center bg-yellow text-black font-bold text-lg px-10 py-4 rounded-lg shadow-[0_0_35px_rgba(250,204,21,0.6)] hover:brightness-110 transition"
+              className="inline-flex items-center justify-center border border-yellow/30 text-yellow font-bold text-lg px-10 py-4 rounded-lg hover:bg-yellow/10 transition"
             >
               Explore CSRV64
             </a>
+
           </div>
 
           {/* Scroll Indicator */}
