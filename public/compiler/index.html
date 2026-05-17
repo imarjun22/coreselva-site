@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CoreSelva — RISC-V C → Hex Compiler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #000000;
+  --bg2:      #0a0a0a;
+  --bg3:      #111111;
+  --panel:    #0d0d0d;
+  --border:   #1f1f1f;
+  --border2:  #2a2a2a;
+  --yellow:   #FFD600;
+  --yellow2:  #FFC200;
+  --yellow-dim: rgba(255,214,0,0.12);
+  --yellow-glow: rgba(255,214,0,0.25);
+  --text:     #ffffff;
+  --text2:    #999999;
+  --text3:    #444444;
+  --danger:   #ff4444;
+  --success:  #44ff88;
+  --mono:     'IBM Plex Mono', monospace;
+  --sans:     'IBM Plex Sans', sans-serif;
+  --display:  'Bebas Neue', sans-serif;
+}
+
+html { font-size: 14px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Yellow glow orb (like CoreSelva) ── */
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 800px; height: 500px;
+  background: radial-gradient(ellipse at center, rgba(255,214,0,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ────────────────────────── */
+header {
+  position: relative;
+  z-index: 10;
+  padding: 0 2rem;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.95);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-chip {
+  width: 32px; height: 32px;
+  background: var(--yellow);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.logo-mark {
+  font-family: var(--display);
+  font-size: 1.6rem;
+  letter-spacing: 0.05em;
+  color: var(--yellow);
+}
+
+.logo-sub {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: 0.78rem;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-left: 1px solid var(--border2);
+  padding-left: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  font-size: 0.72rem;
+  color: var(--text3);
+  font-family: var(--sans);
+  letter-spacing: 0.08em;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--text3);
+  transition: all 0.3s;
+}
+.status-dot.online  { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+.status-dot.error   { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+.status-dot.loading { background: var(--yellow); animation: pulse 1s infinite; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ─── Workspace ─────────────────────── */
+.workspace {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr auto;
+  height: calc(100vh - 60px);
+}
+
+/* ─── Toolbar ───────────────────────── */
+.toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 1.5rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolbar-label {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  color: var(--text3);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+select {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+select:hover, select:focus { border-color: var(--yellow); }
+
+.btn-compile {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 1.6rem;
+  background: var(--yellow);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-compile:hover {
+  background: var(--yellow2);
+  box-shadow: 0 0 24px var(--yellow-glow);
+}
+.btn-compile:active { transform: scale(0.97); }
+.btn-compile:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--yellow); color: var(--yellow); }
+
+/* ─── Panels ────────────────────────── */
+.panel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+.panel:last-child { border-right: none; }
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text3);
+}
+.panel-title em {
+  color: var(--yellow);
+  font-style: normal;
+  margin-right: 0.5rem;
+}
+
+.panel-actions { display: flex; gap: 0.4rem; }
+
+.tab-bar {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1rem;
+}
+
+.tab {
+  padding: 0.45rem 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  background: none;
+  border-top: none; border-left: none; border-right: none;
+  font-family: var(--sans);
+  font-weight: 600;
+}
+.tab:hover  { color: var(--text2); }
+.tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+/* ─── Editor ────────────────────────── */
+.editor-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.line-nums {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 46px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 1rem 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.line-nums span {
+  display: block;
+  text-align: right;
+  padding-right: 10px;
+  font-size: 0.72rem;
+  line-height: 1.65;
+  color: var(--text3);
+  font-family: var(--mono);
+}
+
+textarea#code-input {
+  position: absolute;
+  inset: 0;
+  padding: 1rem 1rem 1rem 58px;
+  background: var(--panel);
+  color: #e8e8e8;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: var(--mono);
+  font-size: 0.83rem;
+  line-height: 1.65;
+  tab-size: 4;
+  caret-color: var(--yellow);
+}
+textarea#code-input::selection { background: rgba(255,214,0,0.12); }
+textarea#code-input::placeholder { color: var(--text3); }
+
+/* ─── Output ────────────────────────── */
+.output-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--panel);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text2);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.output-body::-webkit-scrollbar { width: 3px; }
+.output-body::-webkit-scrollbar-track { background: var(--bg); }
+.output-body::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.output-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+  color: var(--text3);
+}
+.output-placeholder .chip-icon {
+  width: 56px; height: 56px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  opacity: 0.5;
+}
+.output-placeholder p {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+}
+
+.hex-word { color: #cccccc; }
+.error-output { color: var(--danger); white-space: pre-wrap; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.badge-ok    { background: rgba(68,255,136,0.08); border: 1px solid rgba(68,255,136,0.25); color: var(--success); }
+.badge-fail  { background: rgba(255,68,68,0.08);  border: 1px solid rgba(255,68,68,0.25);  color: var(--danger); }
+
+/* ─── Status bar ────────────────────── */
+.statusbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0 1.5rem;
+  height: 28px;
+  background: var(--yellow);
+  color: #000;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.statusbar.error { background: var(--danger); color: #fff; }
+.statusbar.idle  { background: var(--bg2); color: var(--text3); border-top: 1px solid var(--border); font-weight: 400; }
+
+.sb-sep { opacity: 0.3; }
+
+/* ─── Spinner ───────────────────────── */
+.spinner {
+  width: 13px; height: 13px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Download btns ─────────────────── */
+.btn-download {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--yellow);
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-download:hover { background: var(--yellow2); box-shadow: 0 0 16px var(--yellow-glow); }
+
+.btn-dl-elf {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  font-weight: 400;
+}
+.btn-dl-elf:hover { border-color: var(--yellow); color: var(--yellow); box-shadow: none; background: transparent; }
+
+@media (max-width: 800px) {
+  .workspace { grid-template-columns: 1fr; grid-template-rows: auto 1fr 1fr auto; height: auto; min-height: calc(100vh - 60px); }
+  .panel { min-height: 40vh; }
+  .logo-sub { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-chip">⬡</div>
+    <span class="logo-mark">CoreSelva </span>
+    <span class="logo-sub">RISC-V C → Hex Compiler</span>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <span class="status-dot" id="dot"></span>
+      <span id="conn-label">Connecting…</span>
+    </div>
+    <span id="sb-arch-hdr" style="color:var(--text3)">rv32i · ilp32</span>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <span class="toolbar-label">Arch</span>
+      <select id="sel-arch">
+        <option value="rv32i" selected>rv32i</option>
+        <option value="rv32im">rv32im</option>
+        <option value="rv32imc">rv32imc</option>
+      </select>
+    </div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Opt</span>
+      <select id="sel-opt">
+        <option value="O0">-O0  none</option>
+        <option value="O1">-O1  light</option>
+        <option value="O2">-O2  medium</option>
+        <option value="Os">-Os  size</option>
+      </select>
+    </div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Format</span>
+      <select id="sel-fmt">
+        <option value="verilog">Verilog Hex</option>
+        <option value="ihex">Intel HEX</option>
+      </select>
+    </div>
+    <button class="btn-secondary" id="btn-example">⚡ Example</button>
+    <button class="btn-secondary" id="btn-clear">✕ Clear</button>
+    <button class="btn-compile" id="btn-compile">
+      <span id="compile-icon">▶</span>
+      <span id="compile-label">Compile to Hex</span>
+    </button>
+  </div>
+
+  <!-- Editor -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title"><em>01</em>SOURCE / main.c</span>
+      <span id="line-count" style="font-size:0.68rem;color:var(--text3);font-family:var(--sans)">0 lines</span>
+    </div>
+    <div class="editor-wrap">
+      <div class="line-nums" id="line-nums"></div>
+      <textarea id="code-input" spellcheck="false" autocomplete="off" autocorrect="off"
+        placeholder="// Paste bare-metal C here&#10;// No stdlib — entry point: int main(void)"></textarea>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title"><em>02</em>OUTPUT</span>
+      <div class="panel-actions">
+        <a class="btn-download btn-dl-elf" id="btn-dl-elf" href="#" style="display:none">↓ ELF</a>
+        <a class="btn-download" id="btn-dl-hex" href="#" style="display:none">↓ Download .hex</a>
+      </div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab active" data-tab="hex">Hex Output</button>
+      <button class="tab" data-tab="asm">Disassembly</button>
+      <button class="tab" data-tab="log">Build Log</button>
+    </div>
+    <div class="output-body" id="output-body">
+      <div class="output-placeholder">
+        <div class="chip-icon">⬡</div>
+        <p>Compile your C code to see the hex output</p>
+        <p style="font-size:0.7rem;opacity:0.5">Backend: localhost:8765</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar idle" id="statusbar">
+    <span>○ Ready</span>
+    <span class="sb-sep">│</span>
+    <span id="sb-arch">rv32i · ilp32</span>
+    <span class="sb-sep">│</span>
+    <span id="sb-info">No compilation yet</span>
+  </div>
+
+</div>
+
+<script>
+const BACKEND = 'https://coreselva-compiler-backend-1.onrender.com';
+
+let state = { hex:'', elf_b64:'', asm:'', log:'', status:'idle', activeTab:'hex' };
+
+const $code        = document.getElementById('code-input');
+const $lineNums    = document.getElementById('line-nums');
+const $lineCount   = document.getElementById('line-count');
+const $output      = document.getElementById('output-body');
+const $dot         = document.getElementById('dot');
+const $connLabel   = document.getElementById('conn-label');
+const $sb          = document.getElementById('statusbar');
+const $sbInfo      = document.getElementById('sb-info');
+const $sbArch      = document.getElementById('sb-arch');
+const $sbArchHdr   = document.getElementById('sb-arch-hdr');
+const $btnCompile  = document.getElementById('btn-compile');
+const $compileIcon = document.getElementById('compile-icon');
+const $compileLabel= document.getElementById('compile-label');
+const $btnDlHex    = document.getElementById('btn-dl-hex');
+const $btnDlElf    = document.getElementById('btn-dl-elf');
+const $selArch     = document.getElementById('sel-arch');
+const $selOpt      = document.getElementById('sel-opt');
+const $selFmt      = document.getElementById('sel-fmt');
+
+const EXAMPLE = `// Bare-metal RISC-V — fibonacci into memory
+#define MEM_BASE 0x00010100
+#define N_TERMS  12
+typedef unsigned int uint32_t;
+
+int main(void) {
+    volatile uint32_t *out = (volatile uint32_t *)MEM_BASE;
+    uint32_t a = 0, b = 1, tmp;
+    for (int i = 0; i < N_TERMS; i++) {
+        out[i] = a;
+        tmp = a + b; a = b; b = tmp;
+    }
+    *(volatile uint32_t *)(MEM_BASE + N_TERMS * 4) = 0xDEADBEEF;
+    while (1);
+    return 0;
+}`;
+
+// Line numbers
+function updateLineNums() {
+  const lines = $code.value.split('\n');
+  $lineNums.innerHTML = lines.map((_,i) => `<span>${i+1}</span>`).join('');
+  $lineCount.textContent = `${lines.length} lines`;
+}
+$code.addEventListener('input', updateLineNums);
+$code.addEventListener('scroll', () => { $lineNums.scrollTop = $code.scrollTop; });
+$code.addEventListener('keydown', e => {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const s = $code.selectionStart, en = $code.selectionEnd;
+    $code.value = $code.value.substring(0,s) + '    ' + $code.value.substring(en);
+    $code.selectionStart = $code.selectionEnd = s + 4;
+    updateLineNums();
+  }
+});
+
+// Tabs
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    state.activeTab = tab.dataset.tab;
+    renderOutput();
+  });
+});
+
+// Arch change
+$selArch.addEventListener('change', () => {
+  const v = `${$selArch.value} · ilp32`;
+  $sbArch.textContent = v;
+  $sbArchHdr.textContent = v;
+});
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderOutput() {
+  const tab = state.activeTab;
+  if (state.status === 'idle') {
+    $output.innerHTML = `<div class="output-placeholder">
+      <div class="chip-icon">⬡</div>
+      <p>Compile your C code to see the hex output</p>
+      <p style="font-size:0.7rem;opacity:0.4">Backend: ${BACKEND}</p>
+    </div>`; return;
+  }
+  if (state.status === 'compiling') {
+    $output.innerHTML = `<div class="output-placeholder">
+      <div class="spinner" style="border-top-color:var(--yellow);border-color:rgba(255,214,0,0.15)"></div>
+      <p>Compiling…</p>
+    </div>`; return;
+  }
+  if (state.status === 'error') {
+    $output.innerHTML = `<div style="margin-bottom:1rem"><span class="badge badge-fail">✕ Build Failed</span></div>`
+      + `<div class="error-output">${esc(tab==='log' ? state.log : state.hex)}</div>`; return;
+  }
+  if (tab === 'hex') {
+    $output.innerHTML = state.hex.split('\n').filter(Boolean)
+      .map(l => `<span class="hex-word">${esc(l)}</span>`).join('\n');
+  } else if (tab === 'asm') {
+    $output.innerHTML = state.asm.split('\n').map(line => {
+      const e = esc(line);
+      if (!line.startsWith(' ') && !line.startsWith('\t') && line.includes('<'))
+        return `<span style="color:var(--yellow);font-weight:500">${e}</span>`;
+      if (/^\s+[0-9a-f]+:/.test(line))
+        return e.replace(/^(\s+)([0-9a-f]+:)/, (_,sp,addr) =>
+          `${sp}<span style="color:var(--text3)">${addr}</span>`);
+      return `<span style="color:var(--text2)">${e}</span>`;
+    }).join('\n');
+  } else {
+    $output.innerHTML = `<span class="badge badge-ok">✓ Build OK</span>\n\n` + esc(state.log);
+  }
+}
+
+async function compile() {
+  const code = $code.value.trim();
+  if (!code) { alert('Paste some C code first!'); return; }
+
+  state.status = 'compiling'; state.hex = state.asm = state.log = '';
+  renderOutput();
+  $btnCompile.disabled = true;
+  $compileIcon.innerHTML = '<span class="spinner"></span>';
+  $compileLabel.textContent = 'Compiling…';
+  $sb.className = 'statusbar';
+  $sbInfo.textContent = 'Compiling…';
+  $btnDlHex.style.display = 'none';
+  $btnDlElf.style.display = 'none';
+
+  try {
+    const res = await fetch(`${BACKEND}/compile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, opt: $selOpt.value, format: $selFmt.value, arch: $selArch.value }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    if (data.success) {
+      state.status = 'success';
+      state.hex = data.hex || ''; state.asm = data.asm || ''; state.log = data.logs || '';
+
+      const hexBlob = new Blob([data.hex], { type: 'text/plain' });
+      $btnDlHex.href = URL.createObjectURL(hexBlob);
+      $btnDlHex.download = 'main.hex';
+      $btnDlHex.style.display = 'inline-flex';
+
+      if (data.elf_b64) {
+        const eb = Uint8Array.from(atob(data.elf_b64), c => c.charCodeAt(0));
+        $btnDlElf.href = URL.createObjectURL(new Blob([eb], { type: 'application/octet-stream' }));
+        $btnDlElf.download = 'main.elf';
+        $btnDlElf.style.display = 'inline-flex';
+      }
+
+      const hexLines = data.hex.split('\n').filter(Boolean).length;
+      $sb.className = 'statusbar';
+      $sbInfo.textContent = `✓ OK · ${hexLines} hex records`;
+    } else {
+      state.status = 'error';
+      state.hex = data.error || 'Unknown error';
+      state.log = typeof data.logs === 'string' ? data.logs :
+        (data.logs||[]).map(([n,rc,o,e])=>`[${n}] rc=${rc}\n${o}${e}`).join('\n');
+      $sb.className = 'statusbar error';
+      $sbInfo.textContent = '✕ Build Failed';
+    }
+  } catch (err) {
+    state.status = 'error';
+    state.hex = `Connection error: ${err.message}\n\nMake sure the backend is running:\n  python server.py`;
+    $sb.className = 'statusbar error';
+    $sbInfo.textContent = '✕ Backend Unreachable';
+  }
+
+  renderOutput();
+  $btnCompile.disabled = false;
+  $compileIcon.textContent = '▶';
+  $compileLabel.textContent = 'Compile to Hex';
+}
+
+$btnCompile.addEventListener('click', compile);
+document.getElementById('btn-example').addEventListener('click', () => { $code.value = EXAMPLE; updateLineNums(); });
+document.getElementById('btn-clear').addEventListener('click', () => {
+  $code.value = ''; updateLineNums();
+  state.status = 'idle'; renderOutput();
+  $btnDlHex.style.display = 'none'; $btnDlElf.style.display = 'none';
+  $sb.className = 'statusbar idle'; $sbInfo.textContent = 'No compilation yet';
+});
+document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && e.key==='Enter') compile(); });
+
+async function checkBackend() {
+  try {
+    await fetch(`${BACKEND}/compile`, { method:'OPTIONS', signal: AbortSignal.timeout(2000) });
+    $dot.className = 'status-dot online';
+    $connLabel.textContent = 'Backend Online';
+  } catch {
+    $dot.className = 'status-dot error';
+    $connLabel.textContent = 'Backend Offline';
+  }
+}
+
+updateLineNums();
+checkBackend();
+setInterval(checkBackend, 10000);
+</script>
+</body>
+</html>
