@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta http-equiv="refresh" content="0; url=../embedded-c-roadmap/index.html">
+  <script>window.location.replace("../embedded-c-roadmap/index.html" + window.location.hash);</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical, interactive Embedded C guide from first program to advanced firmware.">
+  <title>CoreSelva Academy - Embedded C</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#course-welcome" aria-label="CoreSelva Academy home">
+      <span class="brand-mark">CS</span>
+      <span>CoreSelva <b>Academy</b></span>
+    </a>
+    <button class="icon-button mobile-only" id="menuButton" aria-label="Open lessons" aria-expanded="false">☰</button>
+    <div class="top-search">
+      <span aria-hidden="true">⌕</span>
+      <input id="searchInput" type="search" placeholder="Search GPIO, volatile, SPI..." autocomplete="off">
+      <kbd>/</kbd>
+    </div>
+    <nav class="top-actions" aria-label="Page tools">
+      <button class="text-button" id="referenceButton">Quick reference</button>
+      <button class="icon-button" id="themeButton" aria-label="Toggle dark mode">◐</button>
+      <div class="progress-pill" title="Course progress">
+        <span id="progressText">0%</span>
+        <span class="progress-track"><span id="progressBar"></span></span>
+      </div>
+    </nav>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Course lessons">
+      <div class="sidebar-heading">
+        <p>LEARNING PATH</p>
+        <h2>Embedded C</h2>
+        <span>From first program to firmware</span>
+      </div>
+      <nav id="lessonNav"></nav>
+      <div class="sidebar-footer">
+        <p><span class="pulse-dot"></span><span>Learn one idea at a time</span></p>
+        <small>Read. Trace. Practise. Explain.</small>
+      </div>
+    </aside>
+
+    <main class="lesson" id="lesson" tabindex="-1">
+      <div class="lesson-loading">Loading the field guide...</div>
+    </main>
+
+    <aside class="right-rail" id="rightRail" aria-label="Lesson outline and references">
+      <section class="rail-card">
+        <p class="eyebrow">ON THIS PAGE</p>
+        <nav id="pageOutline"></nav>
+      </section>
+      <section class="rail-card book-card">
+        <p class="eyebrow">SOURCE MAP</p>
+        <p id="sourceMap"></p>
+        <span>Original lessons with platform-specific examples clearly identified.</span>
+      </section>
+      <section class="rail-card shortcut-card">
+        <div><kbd>/</kbd><span>Search</span></div>
+        <div><kbd>J</kbd><span>Next lesson</span></div>
+        <div><kbd>K</kbd><span>Previous lesson</span></div>
+      </section>
+    </aside>
+  </div>
+
+  <dialog id="referenceDialog">
+    <div class="dialog-head">
+      <div><p class="eyebrow">FIELD CARD</p><h2>Embedded C quick reference</h2></div>
+      <button class="icon-button" id="closeReference" aria-label="Close reference">×</button>
+    </div>
+    <div class="reference-grid">
+      <section><h3>Integer types</h3><code>uint8_t  int16_t<br>uint32_t int32_t<br>size_t   uintptr_t</code></section>
+      <section><h3>Bit operations</h3><code>x |= mask;   // set<br>x &= ~mask;  // clear<br>x ^= mask;   // toggle<br>(x >> n) & 1U</code></section>
+      <section><h3>GPIO pattern</h3><code>clock → mode → pull<br>speed → alternate fn<br>read/write data</code></section>
+      <section><h3>ISR rules</h3><code>Keep it short<br>Clear the source<br>Share with volatile<br>Defer heavy work</code></section>
+      <section><h3>Debug order</h3><code>Power → clock → pin<br>peripheral → NVIC<br>software state</code></section>
+      <section><h3>Units</h3><code>1 MHz = 10⁶ cycles/s<br>T = 1/f<br>ADC LSB = Vref / 2ⁿ</code></section>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="content.js"></script>
+  <script src="content-foundations.js"></script>
+  <script src="content-topics.js"></script>
+  <script src="content-depth.js"></script>
+  <script src="content-public.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

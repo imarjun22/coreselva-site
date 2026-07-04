@@ -1,42 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CoreSelva platform
 
-## Getting Started
+The public website for [www.coreselva.com](https://www.coreselva.com): open
+educational hardware, CoreSelva Academy, technical community discussions, member
+profiles, and project publishing.
 
-First, run the development server:
+## Information architecture
 
-```bash
+- `/` — platform homepage and primary calls to action
+- `/products` — CSRV64 hardware and public roadmap
+- `/academy` — learning tracks and the embedded-C course
+- `/academy/embedded-c/index.html` — compatibility redirect to the current roadmap
+- `/academy/embedded-c-roadmap/index.html` — 15-phase, 129-topic guided Embedded C and STM32 roadmap
+- `/community` — searchable discussions grouped by engineering topic
+- `/community/[slug]` — thread with profile-linked nested replies
+- `/projects` — filterable public project showcase
+- `/projects/[slug]` — technical project page and nested comments
+- `/profile/[username]` — public profile, projects, and discussions
+- `/compiler` — existing RISC-V compiler interface
+
+## Local development
+
+```powershell
+npm install
+Copy-Item .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`. Without Supabase variables the community renders
+representative preview content, while posting and authentication remain disabled.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Enable profiles, forums, replies, and projects
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create a Supabase project.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) in its SQL editor.
+3. In Supabase Authentication, enable GitHub and enter a GitHub OAuth app client
+   ID and secret.
+4. Add these redirect URLs to the provider configuration:
+   - `http://localhost:3000/community`
+   - `https://www.coreselva.com/community`
+5. Copy the project URL and public anonymous key into `.env.local`:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
+```
 
-To learn more about Next.js, take a look at the following resources:
+The browser uses only the public anonymous key. Database row-level security in
+the schema ensures members can create and edit only their own public content.
+Never expose the Supabase service-role key to the browser or commit it.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Production checks
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```powershell
+npm run lint
+npm run build
+npm audit --omit=dev
+```
 
-## Deploy on Vercel
+The repository is designed for Vercel. Configure the two public Supabase
+environment variables in the Vercel project, redeploy, and test GitHub sign-in
+before publicly announcing community publishing.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Moderation baseline
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The schema includes hidden-content flags, member/moderator/admin roles, reports,
+author ownership policies, locked threads, bounded content fields, and public
+read-only access. Before launch, designate moderators, publish the community
+guidelines, and test report/hidden-content workflows from non-admin accounts.
 
 ## License
 
-This project is licensed under the Apache License 2.0.
-
-© 2026 Karan Arjun S — CoreSelva
+Apache License 2.0. © 2026 Karan Arjun Selvan — CoreSelva.

@@ -1,7 +1,25 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["http://10.153.228.139:3000"],
+  async redirects() {
+    return [
+      {
+        source: "/academy/embedded-c/index.html",
+        destination: "/academy/embedded-c-roadmap/index.html",
+        permanent: false,
+      },
+      { source: "/community/:path*", destination: "/", permanent: false },
+      { source: "/profile/:path*", destination: "/", permanent: false },
+      { source: "/projects/new", destination: "/", permanent: false },
+      { source: "/projects/:path*", destination: "/", permanent: false },
+    ];
+  },
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "**.supabase.co" },
+    ],
+  },
 };
 
 export default nextConfig;
