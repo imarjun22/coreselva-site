@@ -19,5 +19,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><Navbar/><main>{children}</main><Footer/><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "CoreSelva", founder: [{ "@type": "Person", name: "Karan Arjun Selvan", sameAs: "https://www.linkedin.com/in/karanarjuns/" }, { "@type": "Person", name: "Vishal Selvan", sameAs: "https://www.linkedin.com/in/vishal-selvan-252328285/" }], url: "https://www.coreselva.com", logo: "https://www.coreselva.com/logo.png", sameAs: ["https://github.com/imarjun22"] }) }}/></body></html>;
+  return <html lang="en"><body><Navbar/><main>{children}</main><Footer/><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "Organization", name: "CoreSelva", founder: [{ "@type": "Person", name: "Karan Arjun Selvan", sameAs: "https://www.linkedin.com/in/karanarjuns/" }, { "@type": "Person", name: "Vishal Selvan", sameAs: "https://www.linkedin.com/in/vishal-selvan-252328285/" }], url: "https://www.coreselva.com", logo: "https://www.coreselva.com/logo.png" }) }}/></body></html>;
 }
