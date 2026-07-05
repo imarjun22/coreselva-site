@@ -19,7 +19,7 @@ export const products = [
     features: ["RV64G target", "Supervisor mode", "Sv39 MMU", "OpenSBI", "Linux boot"], repo: null,
   },
   {
-    slug: "csrv32-i", group: "RV32" as ProductFamily, family: "RV32 · Educational", name: "CSRV32-I", role: "Educational MCU core", status: "In development", statusTone: "blue",
+    slug: "rv32i-sc", group: "RV32" as ProductFamily, family: "RV32 · Educational", name: "RV32I_SC", role: "Stable single-cycle core", status: "Stable", statusTone: "green",
     summary: "A compact single-cycle core for learning MCU-class RISC-V fundamentals without pipeline complexity.",
     features: ["RV32I base ISA", "Single-cycle datapath", "Machine mode", "FPGA-first design", "Small SoC focus"], repo: "https://github.com/vishal-17-selvan/RISC-V-RV32I-Single-Cycle",
   },
